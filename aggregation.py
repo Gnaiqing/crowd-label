@@ -1,5 +1,10 @@
 from crowdkit.aggregation.dawid_skene import DawidSkene
 from crowdkit.aggregation.majority_vote import MajorityVote
+from crowdkit.aggregation.gold_majority_vote import GoldMajorityVote
+from crowdkit.aggregation.m_msr import MMSR
+from crowdkit.aggregation.wawa import Wawa
+from crowdkit.aggregation.zero_based_skill import ZeroBasedSkill
+from crowdkit.aggregation.glad import GLAD
 import pandas as pd
 
 
@@ -33,12 +38,24 @@ df_val = df[df["golden"].isna() == False] # the validation set (trap questions) 
 df_test = df[df["golden"].isna()] # the test set (main pool) that has no available ground-truth label
 describe_data(df_val, "Valid pool")
 describe_data(df_test, "Main pool")
-aggregation_method = "DS" # one of "MV"(majority vote), "DS"(Dawid-Skene)
+aggregation_method = "GLAD" # one of "MV"(majority vote), "DS"(Dawid-Skene)
 if aggregation_method == "MV":
     aggregated_labels = MajorityVote().fit_predict(df_test)
 
 elif aggregation_method == "DS":
     aggregated_labels = DawidSkene(n_iter=100).fit_predict(df_test)
+
+elif aggregation_method == "MMSR":
+    aggregated_labels = MMSR().fit_predict(df_test)
+
+elif aggregation_method == "WAWA":
+    aggregated_labels = Wawa().fit_predict(df_test)
+
+elif aggregation_method == "ZeroSkill":
+    aggregated_labels = ZeroBasedSkill().fit_predict(df_test)
+
+elif aggregation_method == "GLAD":
+    aggregated_labels = GLAD().fit_predict(df_test)
 
 df_aggregated = df_test.drop_duplicates(subset="task").set_index("task")
 df_aggregated["relevance"] = aggregated_labels
